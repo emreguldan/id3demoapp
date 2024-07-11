@@ -14,9 +14,9 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @PostMapping("/{userId}")
-    public Account createAccount(@PathVariable Long userId, @RequestBody Account account) {
-        return accountService.createAccount(userId, account);
+    @PostMapping("/")
+    public Account createAccount(@RequestBody Account account) {
+        return accountService.createAccount(account);
     }
 
     @GetMapping("/{userId}")

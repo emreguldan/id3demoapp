@@ -2,6 +2,8 @@ package tr.com.id3.guldan.emre.id3demoapp.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import tr.com.id3.guldan.emre.id3demoapp.entity.Account;
 import tr.com.id3.guldan.emre.id3demoapp.entity.User;
@@ -18,7 +20,17 @@ public class AccountService {
     @Autowired
     private UserRepository userRepository;
 
-    public Account createAccount(Long userId, Account account) {
+    public Account createAccount(Account account) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Long userId;
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
+            User user = userRepository.findByEmail(username).orElseThrow(() -> new EntityNotFoundException("User not found with email: " + username));
+            userId = user.getId();
+        } else {
+            throw new IllegalStateException("User not authenticated");
+        }
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
         account.setUser(user);
         return accountRepository.save(account);
